@@ -1,4 +1,4 @@
-const Navigate = () => {
+const SeanceData = () => {
   return (
     <div className="w-full flex justify-between min-h-8 mt-2 mb-8 text-xs">
       <button className="bg-white/90 py-3 px-5 min-w-32 rounded-sm active:min-w-60 active:font-black text-left">
@@ -64,4 +64,4 @@ const Navigate = () => {
   );
 };
 
-export default Navigate;
+export default SeanceData;

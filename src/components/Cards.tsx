@@ -1,4 +1,20 @@
+import Halls from "../components/Halls";
+
 const Cards = ({ film, halls, seances }) => {
+  let filteredHalls = [];
+
+  if (Array.isArray(seances)) {
+    filteredHalls = halls.filter((hall) =>
+      seances.some(
+        (seance) =>
+          seance.seance_hallid === hall.id && seance.seance_filmid === film.id
+      )
+    );
+  } else {
+    return [];
+  }
+
+  console.log(filteredHalls);
   return (
     <>
       <div className="mb-8 p-4 bg-white/90 py-3 px-5 rounded-sm">
@@ -10,17 +26,28 @@ const Cards = ({ film, halls, seances }) => {
             <div className="font-bold text-base">{film.film_name}</div>
             <div className="font-normal text-sm">{film.film_description}</div>
             <span className="font-light text-sm">
-              {film.film_duration} минут{" "}
+              {film.film_duration} минут
             </span>
             <br />
             <span className="font-light text-sm">{film.film_origin}</span>
           </div>
         </div>
-        {Object.entries(seances).map(([hallId, hallSeances]) => {
-          const hall = halls.find(
-            (h) => h.id === Number(hallSeances.seance_hallid)
-          );
-          console.log(seances);
+        {filteredHalls.map((hall) => (
+          <Halls
+            key={hall.id}
+            hall={hall}
+            seances={seances.filter(
+              (seance) => seance.seance_filmid === film.id
+            )}
+          />
+        ))}
+        {/* {Object.entries(seances).map(([index, seance]) => {
+          // const hall = halls.find((h) => h.id === seance[0][i].seance_hallid);
+          console.log(seance);
+        })} */}
+        {/* {Object.entries(seances).map(([hallId, hallSeances]) => {
+          const hall = halls.find((h) => h.id === hallSeances.seance_hallid);
+          // console.log(hallSeances);
 
           return (
             <div className="mb-4" key={hallId}>
@@ -41,7 +68,7 @@ const Cards = ({ film, halls, seances }) => {
               </div>
             </div>
           );
-        })}
+        })} */}
       </div>
     </>
   );

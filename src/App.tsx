@@ -27,6 +27,7 @@ function App() {
           acc[filmId].push(seance);
           return acc;
         }, {});
+        // console.log(grouped);
 
         setGroupedSeances(grouped);
         setData(result.result);
@@ -37,8 +38,8 @@ function App() {
 
     fetchData();
   }, []);
-  console.log(groupedSeances);
-  console.log(data);
+  // console.log(groupedSeances);
+  // console.log(data);
 
   return (
     <>

@@ -1,145 +1,71 @@
 import Header from "../components/Header";
 import "../App.css";
+import React from "react";
+import { useSearchParams } from "react-router-dom";
 
-const hall = [
-  [
-    "vip",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-  ],
-  [
-    "vip",
-    "vip",
-    "standart",
-    "disabled",
-    "disabled",
-    "disabled",
-    "disabled",
-    "standart",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "vip",
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "vip",
-    "vip",
-    "vip",
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "vip",
-    "vip",
-    "vip",
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "vip",
-    "standart",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "standart",
-    "vip",
-    "standart",
-  ],
-  [
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "vip",
-    "vip",
-    "standart",
-    "standart",
-    "standart",
-    "vip",
-  ],
-];
+const Hall = ({ films, halls, seances }) => {
+  const [selectedSeats, setSelectedSeats] = React.useState([]);
 
-const Hall = () => {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+
+  let film = null;
+  let hall = null;
+  let seance = null;
+
+  if (seances.length > 0) {
+    const filterSeances = seances.find((seance) => seance.id === Number(id));
+
+    if (filterSeances) {
+      const { seance_filmid, seance_hallid, seance_time } = filterSeances;
+      seance = seance_time;
+      film = films.filter((item) => item.id === seance_filmid)[0];
+      hall = halls.filter((item) => item.id === seance_hallid)[0];
+    }
+  }
+
+  const toggleSeatSelection = (row, seatIndex, seat) => {
+    const seatId = `${row}р-${seatIndex}м`;
+    if (seat !== "taken" && seat !== "disabled") {
+      setSelectedSeats((prevSelectedSeats) =>
+        prevSelectedSeats.includes(seatId)
+          ? prevSelectedSeats.filter((seat) => seat !== seatId)
+          : [...prevSelectedSeats, seatId]
+      );
+    } else {
+      return null;
+    }
+  };
+
+  const getSeatClass = (row, seatIndex, seat) => {
+    const seatId = `${row}р-${seatIndex}м`;
+    const isSelected = selectedSeats.includes(seatId);
+    if (isSelected) {
+      return "cheked";
+    } else {
+      return seat;
+    }
+  };
+
+  if (!film || !hall || !seance) {
+    return null;
+  }
+
   return (
     <>
       <div className="bg-[url('./assets/77987fbb92422660c7bd27edcefc669d.jpeg')] bg-cover bg-no-repeat w-full h-full bg-fixed">
         <div className="max-w-5xl my-0 mx-auto h-screen">
-        <Header />
+          <Header />
           <div className="w-full bg-white/90">
             <div className="p-3">
-              <h1 className="font-bold text-base">
-                Звёздные войны XXIII: Атака клонированных клонов
-              </h1>
+              <h1 className="font-bold text-base">{film.film_name}</h1>
+
               <div className="font-light text-sm">
                 <span>Начало сеанса: </span>
-                <span>18:30</span>
+                <span>{seance}</span>
               </div>
-              <div className="font-bold text-base">Зал 1</div>
+
+              <div className="font-bold text-base">{`Зал ${hall.hall_name}`}</div>
             </div>
             <div className="bg-slate-900">
               <div className="w-72 mx-auto">
@@ -156,159 +82,50 @@ const Hall = () => {
                     <path
                       d="M284.5 5.99L284.5 15.99C242.23 12.69 190.31 11.17 142.5 11.49C66.31 11.99 0.5 15.99 0.5 15.99L0.5 5.99C111.06 -1.49 173.55 -1.18 284.5 5.99Z"
                       stroke="#C5C5C5"
-                      stroke-opacity="1.000000"
-                      stroke-width="1.000000"
+                      strokeOpacity="1.000000"
+                      strokeWidth="1.000000"
                     />
                   </svg>
                   <div className=" text-white absolute top-3 right-1/2 translate-x-1/2 text-xs">
                     экран
                   </div>
                 </div>
-                <div className="grid gap-1 grid-cols-10 mb-7 mx-auto w-max">
-                  {hall.map((seats) =>
-                    seats.map((seat) => <button className={seat}></button>)
+                <div
+                  className="grid gap-1 grid-cols-10 mb-7 mx-auto w-max"
+                  style={{
+                    gridTemplateColumns: `repeat(${hall.hall_rows}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {hall.hall_config.map((seats, row) =>
+                    seats.map((seat, seatIndex) => (
+                      <button
+                        onClick={() =>
+                          toggleSeatSelection(row, seatIndex, seat)
+                        }
+                        key={`${row}-${seatIndex}`}
+                        className={getSeatClass(row, seatIndex, seat)}
+                      ></button>
+                    ))
                   )}
                 </div>
-                {/* /* <div className="grid gap-1 grid-cols-12 mb-7 justify-items-center">
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5  rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5  rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-orange-500 rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-cyan-400 shadow-costom rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5  rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5  rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                  <button className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></button>
-                </div>  */}
                 <div className="flex text-white text-sm font-light justify-center gap-3 pb-3">
                   <div>
                     <div className="flex gap-2 items-center mb-2">
-                      <div className="w-5 h-5 bg-white rounded-s rounded-e border-solid border-x border-y border-neutral-600"></div>
-                      <span>Свободно (250руб)</span>
+                      <div className="standart"></div>
+                      <span>{`Свободно (${hall.hall_price_standart} руб)`}</span>
                     </div>
                     <div className="flex gap-2 items-center">
-                      <div className="w-5 h-5 bg-orange-500 rounded-s rounded-e border-solid border-x border-y border-neutral-600"></div>
-                      <span>Свободно VIP (350руб)</span>
+                      <div className="vip"></div>
+                      <span>{`Свободно VIP (${hall.hall_price_vip} руб)`}</span>
                     </div>
                   </div>
                   <div>
                     <div className="flex gap-2 items-center mb-2">
-                      <div className="w-5 h-5  rounded-s rounded-e border-solid border-x border-y border-neutral-600"></div>
+                      <div className="taken"></div>
                       <span>Занято</span>
                     </div>
                     <div className="flex gap-2 items-center">
-                      <div className="w-5 h-5 bg-cyan-400 shadow-costom rounded-s rounded-e border-solid border-x border-y border-neutral-600"></div>
+                      <div className="cheked"></div>
                       <span>Выбрано</span>
                     </div>
                   </div>

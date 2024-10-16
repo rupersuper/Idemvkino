@@ -1,4 +1,4 @@
-import Halls from "../components/Halls";
+import Halls from "./Halls";
 
 const Cards = ({ film, halls, seances }) => {
   const filteredHalls = halls.filter((hall) =>

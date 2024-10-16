@@ -1,6 +1,19 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { TicketContext } from "../App";
 import Header from "../components/Header";
 
 const Payment = () => {
+  const navigate = useNavigate();
+  const { ticketData, setTicketData } = React.useContext(TicketContext);
+
+  if (ticketData.length === 0) {
+    navigate("/");
+    return null;
+  }
+
+  const { filmName, hallName, time } = ticketData[0];
+
   return (
     <div className="bg-[url('./assets/77987fbb92422660c7bd27edcefc669d.jpeg')] bg-cover bg-no-repeat w-full h-screen bg-fixed">
       <div className="max-w-5xl my-0 mx-auto ">
@@ -14,9 +27,7 @@ const Payment = () => {
           <div className="bg-[#F1EBE6]/95 p-6">
             <div className="mb-2">
               На фильм:&nbsp;
-              <span className="font-bold">
-                Звёздные войны XXIII: Атака клонированных клонов
-              </span>
+              <span className="font-bold">{filmName}</span>
             </div>
             <div className="mb-2">
               Места:&nbsp;
@@ -24,11 +35,11 @@ const Payment = () => {
             </div>
             <div className="mb-2">
               В зале:&nbsp;
-              <span className="font-bold">1</span>
+              <span className="font-bold">{hallName}</span>
             </div>
             <div className="mb-2">
               Начало сеанса:&nbsp;
-              <span className="font-bold">18:30</span>
+              <span className="font-bold">{time}</span>
             </div>
             <div className="mb-2">
               Стоимость:&nbsp;
@@ -40,7 +51,7 @@ const Payment = () => {
                 Получить код бронирования
               </button>
             </div>
-            <div className="text-sm font-light" >
+            <div className="text-sm font-light">
               <span>
                 После оплаты билет будет доступен в этом окне, а также придёт
                 вам на почту. Покажите QR-код нашему контроллёру у входа в зал.

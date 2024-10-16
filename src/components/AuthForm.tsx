@@ -23,6 +23,10 @@ const AuthForm = () => {
       if (result.success) {
         localStorage.setItem("isLogin", "true");
         navigate("/admin");
+      } else {
+        alert(result.error);
+        event.target[0].value = "";
+        event.target[1].value = "";
       }
     } catch (error) {
       console.error("Error fetching data:", error);

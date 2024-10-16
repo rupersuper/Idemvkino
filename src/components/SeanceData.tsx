@@ -27,6 +27,7 @@ const SeanceData = () => {
         const isToday = day === format(new Date(), "d");
         return (
           <button
+            key={i}
             onClick={() => handleClick(i)}
             className={`bg-white/90 py-3 px-5 min-w-32 rounded-sm h-14 ${
               activeData === i

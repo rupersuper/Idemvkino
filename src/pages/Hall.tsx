@@ -1,9 +1,18 @@
 import Header from "../components/Header";
 import "../App.css";
 import React from "react";
-import { useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams, useLocation } from "react-router-dom";
+import { TicketContext } from "../App";
 
 const Hall = ({ films, halls, seances }) => {
+  const location = useLocation();
+  const { ticketData, setTicketData } = React.useContext(TicketContext);
+  const handleClick = (filmName, hallName, seanceTime) => {
+    setTicketData((prevData) => [
+      { filmName: filmName, hallName: hallName, time: seanceTime },
+      ...prevData,
+    ]);
+  };
   const [selectedSeats, setSelectedSeats] = React.useState([]);
 
   const [searchParams] = useSearchParams();
@@ -32,10 +41,24 @@ const Hall = ({ films, halls, seances }) => {
           ? prevSelectedSeats.filter((seat) => seat !== seatId)
           : [...prevSelectedSeats, seatId]
       );
+      setTicketData((prevData) => {
+        const selected = prevData.some((seat) => seat.seat === seatId);
+        return selected
+          ? prevData.filter((seat) => seat.seat !== seatId)
+          : [...prevData, { seat: seatId, price: seat }];
+
+        // prevData.includes(seatId)
+        //   ? prevData.filter((seat) => seat.Место !== seatId)
+        //   : [...prevData, { seat: seatId, Стоимость: seat }];
+      });
     } else {
       return null;
     }
   };
+  React.useEffect(() => {
+    setTicketData([]);
+  }, [location.pathname]);
+
 
   const getSeatClass = (row, seatIndex, seat) => {
     const seatId = `${row}р-${seatIndex}м`;
@@ -50,7 +73,7 @@ const Hall = ({ films, halls, seances }) => {
   if (!film || !hall || !seance) {
     return null;
   }
-
+  console.log(ticketData);
   return (
     <>
       <div className="bg-[url('./assets/77987fbb92422660c7bd27edcefc669d.jpeg')] bg-cover bg-no-repeat w-full h-full bg-fixed">
@@ -93,7 +116,7 @@ const Hall = ({ films, halls, seances }) => {
                 <div
                   className="grid gap-1 grid-cols-10 mb-7 mx-auto w-max"
                   style={{
-                    gridTemplateColumns: `repeat(${hall.hall_rows}, minmax(0, 1fr))`,
+                    gridTemplateColumns: `repeat(${hall.hall_places}, minmax(0, 1fr))`,
                   }}
                 >
                   {hall.hall_config.map((seats, row) =>
@@ -132,10 +155,22 @@ const Hall = ({ films, halls, seances }) => {
                 </div>
               </div>
             </div>
-            <div className="text-center">
-              <button className="my-8 focus:outline-none text-white bg-teal-500 hover:bg-teal-600 focus:ring-1 focus:ring-teal-300 shadow-md font-medium rounded-sm uppercase text-sm px-8 py-3">
-                Забронировать
-              </button>
+            <div className="text-center py-8">
+              {ticketData.length === 0 ? (
+                <span className="focus:outline-none text-white bg-slate-400 shadow-md font-medium rounded-sm uppercase text-sm px-8 py-3">
+                  Забронировать
+                </span>
+              ) : (
+                <NavLink
+                  onClick={() =>
+                    handleClick(film.film_name, hall.hall_name, seance)
+                  }
+                  to="/payment"
+                  className="focus:outline-none text-white bg-teal-500 hover:bg-teal-600 focus:ring-1 focus:ring-teal-300 shadow-md font-medium rounded-sm uppercase text-sm px-8 py-3"
+                >
+                  Забронировать
+                </NavLink>
+              )}
             </div>
           </div>
         </div>
